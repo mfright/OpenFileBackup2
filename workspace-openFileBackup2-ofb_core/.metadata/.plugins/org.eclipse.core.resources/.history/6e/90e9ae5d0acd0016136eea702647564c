@@ -1,0 +1,8 @@
+package jp.ddhost.ofb_core;
+
+import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipOutputStream;
+
+public class fileCopier{
+
+}

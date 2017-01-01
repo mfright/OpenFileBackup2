@@ -1,0 +1,68 @@
+package jp.ddhost.ofb_core;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+/// ファイルの最終更新日を管理するクラス
+class lastModifiedManager{
+
+	//ファイル群の最終更新日情報
+	ArrayList<modifyInfo> modifiedInfos = new ArrayList<modifyInfo>();
+
+
+	// コンストラクタ
+	lastModifiedManager(){
+		loadFile();
+	}
+
+	private void loadFile(){
+		try{
+
+			// オープン
+			File file = new File("lastmodified.txt");
+			BufferedReader br = new BufferedReader(new FileReader(file));
+
+
+			String tmpBuffer = br.readLine();
+			String filePath = "";
+			String lastModified="";
+			int separatorPoint = 0;
+			modifyInfo myModifyInfo;
+			while(tmpBuffer != null){
+				separatorPoint = tmpBuffer.indexOf(":");
+				filePath = tmpBuffer.substring(0,separatorPoint);
+				lastModified = tmpBuffer.substring(separatorPoint+1);
+
+				myModifyInfo = new modifyInfo();
+
+				myModifyInfo.lastModified = Long.valueOf(lastModified);
+
+
+
+				tmpBuffer = br.readLine();
+			}
+
+
+			// クローズ
+			  br.close();
+
+		}catch(FileNotFoundException e){
+		  System.out.println(e);
+		}catch(IOException e){
+		  System.out.println(e);
+		}
+	}
+
+	public void saveLastModified(File sourceFile){
+
+	}
+
+	/*
+	public long getLastModified(File sourceFile){
+
+	}*/
+}

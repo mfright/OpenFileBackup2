@@ -1,0 +1,7 @@
+package jp.ddhost.ofb_core;
+
+public class content{
+	public String source = "";	//Backup source folder.
+	public String destination = "";	//Backup destination folder.
+	public String deleted = "";	//Folder deleted files.
+}

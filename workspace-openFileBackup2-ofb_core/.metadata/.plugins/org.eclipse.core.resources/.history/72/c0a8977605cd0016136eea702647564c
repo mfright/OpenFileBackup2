@@ -1,0 +1,43 @@
+package jp.ddhost.ofb_core;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class xmlLoader{
+	/// Load contents.xml
+	private static content loadXml(){
+
+		content loadedContent = new content();
+
+		try{
+			String path = new File(".").getAbsoluteFile().getParent();
+
+			  File file = new File(path + "\\"+"contents.xml");
+			  BufferedReader br = new BufferedReader(new FileReader(file));
+
+			  String str = br.readLine();
+			  while(str != null){
+				  if(str.indexOf("<source>")>-1){
+					  loadedContent.source = str.substring(str.indexOf("<source>")+8, str.indexOf("</source>"));
+				  }else if(str.indexOf("<destination>")>-1){
+					  loadedContent.destination = str.substring(str.indexOf("<destination>")+13, str.indexOf("</destination>"));
+				  }else if(str.indexOf("<deleted>")>-1){
+					  loadedContent.deleted = str.substring(str.indexOf("<deleted>")+9, str.indexOf("</deleted>"));
+				  }
+
+				  str = br.readLine();
+			  }
+
+			  br.close();
+		}catch(FileNotFoundException e){
+		  System.out.println(e);
+		}catch(IOException e){
+		  System.out.println(e);
+		}
+
+		return loadedContent;
+	}
+}

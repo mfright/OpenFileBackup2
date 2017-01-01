@@ -1,0 +1,6 @@
+package jp.ddhost.ofb_core;
+
+/// ファイルの最終更新日を管理するクラス
+class lastModifiedManager{
+
+}

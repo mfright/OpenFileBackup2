@@ -1,0 +1,120 @@
+package jp.ddhost.ofb_ui;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import java.awt.Dialog.ModalityType;
+import javax.swing.JRadioButton;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
+public class destinationSelector extends JDialog {
+
+	private final JPanel contentPanel = new JPanel();
+	private JTextField txtStoragePath;
+	private JTextField txtServerUrl;
+	private JTextField txtFtpid;
+	private JTextField txtFtppw;
+
+
+
+	/**
+	 * Create the dialog.
+	 */
+	public destinationSelector() {
+		setTitle("\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u4FDD\u5B58\u5148");
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setBounds(100, 100, 661, 348);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+
+		JRadioButton rdbStorage = new JRadioButton("\u30B9\u30C8\u30EC\u30FC\u30B8\u307E\u305F\u306F\u30D5\u30A1\u30A4\u30EB\u30B5\u30FC\u30D0\u3092\u4F7F\u7528");
+		rdbStorage.setSelected(true);
+		rdbStorage.setBounds(8, 46, 335, 21);
+		contentPanel.add(rdbStorage);
+
+
+		JRadioButton rdbFtp = new JRadioButton("FTP\u30B5\u30FC\u30D0\u3092\u4F7F\u7528");
+		rdbFtp.setBounds(8, 138, 404, 21);
+		contentPanel.add(rdbFtp);
+
+
+		JPanel buttonPane = new JPanel();
+		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+		{
+			JButton okButton = new JButton("OK");
+			okButton.setActionCommand("OK");
+			buttonPane.add(okButton);
+			getRootPane().setDefaultButton(okButton);
+		}
+		{
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.setActionCommand("Cancel");
+			buttonPane.add(cancelButton);
+		}
+
+
+
+		ButtonGroup group = new ButtonGroup();
+		group.add(rdbStorage);
+		group.add(rdbFtp);
+
+		JLabel label = new JLabel("\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306E\u4FDD\u5B58\u5148\u3092\u6307\u5B9A\u3057\u3066\u304F\u3060\u3055\u3044\u3002");
+		label.setBounds(12, 10, 313, 13);
+		contentPanel.add(label);
+
+		txtStoragePath = new JTextField();
+		txtStoragePath.setBounds(122, 73, 511, 19);
+		contentPanel.add(txtStoragePath);
+		txtStoragePath.setColumns(10);
+
+		JButton btnSelectFolder = new JButton("\u53C2\u7167");
+		btnSelectFolder.setBounds(372, 46, 91, 21);
+		contentPanel.add(btnSelectFolder);
+
+		txtServerUrl = new JTextField();
+		txtServerUrl.setBounds(221, 165, 191, 19);
+		contentPanel.add(txtServerUrl);
+		txtServerUrl.setColumns(10);
+
+		JLabel lblNewLabel = new JLabel("FTP\u30B5\u30FC\u30D0\u30A2\u30C9\u30EC\u30B9+\u30D1\u30B9\uFF1A");
+		lblNewLabel.setBounds(34, 165, 173, 13);
+		contentPanel.add(lblNewLabel);
+
+		JLabel label_1 = new JLabel("\u4FDD\u5B58\u5148\uFF1A");
+		label_1.setBounds(34, 73, 76, 13);
+		contentPanel.add(label_1);
+
+		JLabel lblid = new JLabel("FTP\u30E6\u30FC\u30B6\u30FCID:");
+		lblid.setBounds(34, 197, 91, 13);
+		contentPanel.add(lblid);
+
+		txtFtpid = new JTextField();
+		txtFtpid.setBounds(221, 194, 96, 19);
+		contentPanel.add(txtFtpid);
+		txtFtpid.setColumns(10);
+
+		JLabel lblNewLabel_1 = new JLabel("FTP\u30D1\u30B9\u30EF\u30FC\u30C9");
+		lblNewLabel_1.setBounds(34, 232, 91, 13);
+		contentPanel.add(lblNewLabel_1);
+
+		txtFtppw = new JTextField();
+		txtFtppw.setBounds(221, 229, 96, 19);
+		contentPanel.add(txtFtppw);
+		txtFtppw.setColumns(10);
+		
+		JLabel lblMydomaincombackup = new JLabel("\u4F8B)  mydomain.com/backup");
+		lblMydomaincombackup.setBounds(442, 168, 191, 13);
+		contentPanel.add(lblMydomaincombackup);
+
+	}
+
+}

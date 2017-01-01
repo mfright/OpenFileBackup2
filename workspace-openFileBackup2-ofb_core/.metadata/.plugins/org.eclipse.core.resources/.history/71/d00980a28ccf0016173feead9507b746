@@ -1,0 +1,249 @@
+package jp.ddhost.ofb_core;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.SocketException;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+
+class searchSourceFileFTP{
+
+	content aContent;	//このインスタンスが処理するcontent
+
+	// FTPクライアント
+	FileOutputStream fos = null;
+	FTPClient client = new FTPClient();
+
+
+
+	//コンストラクタ
+	public searchSourceFileFTP(content myContent){
+		aContent = myContent;
+
+		// バックアップ処理する
+		searchSourceFilesFTP(new File(aContent.source));
+	}
+
+
+
+
+	/// 1.バックアップ元フォルダを捜査する。
+	private void searchSourceFilesFTP(File sourceDir){
+
+
+		try {
+			/*
+			// FTP接続
+			client.connect(aContent.getFTPURL());
+			if (!FTPReply.isPositiveCompletion(client.getReplyCode())){
+				System.out.println("ERROR    : FTP connection failed.");
+				return;
+			}
+
+			// FTPログイン
+			if (client.login(aContent.ftpid, aContent.ftppw) == false) { // ログインできたか？
+				System.out.println("ERROR    : FTP login failed.");
+				return;
+			}
+
+			// バイナリモードに設定
+			client.setFileType(FTP.BINARY_FILE_TYPE);
+
+			client.enterLocalPassiveMode();  */
+
+			if( ftpConnect() == false){
+				return;
+			}
+
+
+
+
+			// 全ファイル・フォルダ一覧
+			File[] includedFiles = sourceDir.listFiles();
+
+			//ファイル・フォルダが無いときreturn
+			if( includedFiles == null ){
+				return;
+			}
+
+
+			for( File file : includedFiles ) {
+				if( !file.exists() ){
+					continue;
+
+				}else if( file.isDirectory() ){
+					//フォルダのとき
+
+					//必要ならフォルダ作成
+					makeDestFolder(file);
+
+					//フォルダ内について再帰処理
+			        searchSourceFilesFTP( file );
+
+				}else if( file.isFile() ){
+					//ファイルのとき
+
+					//必要ならコピーする。
+					compare( file );
+			    }
+
+			}
+
+
+
+
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+
+
+
+
+		// FTP切断
+		try {
+			client.disconnect();
+			//fis.close();
+			fos.close();
+
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+
+	}
+
+
+
+	// FTP接続する
+	private Boolean ftpConnect(){
+
+		try{
+		client.connect(aContent.getFTPURL());
+		if (!FTPReply.isPositiveCompletion(client.getReplyCode())){
+			System.out.println("ERROR    : FTP connection failed.");
+			return false;
+		}
+
+		// FTPログイン
+		if (client.login(aContent.ftpid, aContent.ftppw) == false) { // ログインできたか？
+			System.out.println("ERROR    : FTP login failed.");
+			return false;
+		}
+
+		// バイナリモードに設定
+		client.setFileType(FTP.BINARY_FILE_TYPE);
+
+		// Passiveモードに設定
+		//client.enterLocalPassiveMode();
+		}catch(SocketException e){
+
+		}catch(IOException e){
+
+		}
+
+		return true;
+	}
+
+
+
+
+	/// FTP切断
+	private void ftpDisconnect(){
+
+
+		try {
+			client.disconnect();
+			//fis.close();
+			fos.close();
+
+		} catch (Exception e) {
+			// Nothing to do.
+		}
+	}
+
+
+
+	//バックアップ元とバックアップ先を見比べ、必要に応じてアップロードする
+	private void compare(File sourceFile){
+
+		try {
+
+
+
+			// コピー元ファイル
+			String sourceFilePath = sourceFile.getCanonicalPath();
+
+			//コピー先ファイル
+			int sourceLength = aContent.source.length();
+			String destFilePath = sourceFilePath.substring(sourceLength);
+			destFilePath = destFilePath.replace('\\','/');
+			destFilePath = aContent.getFtpRemoteDir() + destFilePath;
+
+
+
+			//String destFolder = destFilePath.substring(0, destFilePath.lastIndexOf('/'));
+			//System.out.println("CD:"+destFolder);
+			//client.changeWorkingDirectory(destFolder);
+
+			//String destFileName = destFilePath.substring(destFilePath.lastIndexOf('/')+1,destFilePath.length());
+
+
+			System.out.println("Upload   :"+sourceFilePath + " > "+destFilePath);
+
+			FileInputStream fis = new FileInputStream(sourceFilePath);
+
+			if(fis.equals(null)){
+				System.out.println("fis is null");
+			}
+
+			client.storeFile(destFilePath, fis);
+			fis.close();
+
+
+		} catch (NullPointerException e){
+			e.printStackTrace();
+
+			try {
+				ftpConnect();
+
+			} catch (IOException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+	private void makeDestFolder(File sourceDir){
+
+		try {
+			// コピー元フォルダ
+			String sourceDirPath = sourceDir.getCanonicalPath();
+
+			//コピー先ディレクトリ
+			int sourceLength = aContent.source.length();
+			String destDirPath = sourceDirPath.substring(sourceLength);
+			destDirPath = destDirPath.replace('\\','/');
+			destDirPath = aContent.getFtpRemoteDir() + destDirPath;
+
+			System.out.println("mkdir    :"+destDirPath);
+			client.makeDirectory(destDirPath);
+
+
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+
+
+
+	}
+}

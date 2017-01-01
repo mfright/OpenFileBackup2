@@ -1,0 +1,66 @@
+package jp.ddhost.ofb_ui;
+
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+
+public class destinationChooser extends JDialog {
+
+	private JPanel contentPane;
+	private JTextField txtStoragePath;
+	private JTextField textField;
+
+
+
+	/**
+	 * Create the frame.
+	 */
+	public destinationChooser() {
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setTitle("\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u5148\u306E\u9078\u629E");
+		setResizable(false);
+		setBounds(100, 100, 681, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+
+		JLabel label = new JLabel("\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u5148\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044\u3002");
+		label.setBounds(12, 20, 404, 13);
+		contentPane.add(label);
+
+		JRadioButton rdbStrage = new JRadioButton("\u30B9\u30C8\u30EC\u30FC\u30B8\u307E\u305F\u306F\u30D5\u30A1\u30A4\u30EB\u30B5\u30FC\u30D0");
+		rdbStrage.setSelected(true);
+		rdbStrage.setBounds(8, 52, 217, 21);
+		contentPane.add(rdbStrage);
+
+		JRadioButton rdbFtp = new JRadioButton("FTP\u30B5\u30FC\u30D0");
+		rdbFtp.setBounds(12, 145, 217, 21);
+		contentPane.add(rdbFtp);
+
+		txtStoragePath = new JTextField();
+		txtStoragePath.setBounds(12, 79, 651, 19);
+		contentPane.add(txtStoragePath);
+		txtStoragePath.setColumns(10);
+
+		JButton btnReferenseFolder = new JButton("\u53C2\u7167");
+		btnReferenseFolder.setBounds(244, 52, 91, 21);
+		contentPane.add(btnReferenseFolder);
+
+		textField = new JTextField();
+		textField.setBounds(162, 172, 275, 19);
+		contentPane.add(textField);
+		textField.setColumns(10);
+
+
+		//アイコンを設定する。
+		ImageIcon img = new ImageIcon("ddleaf.png");
+		this.setIconImage(img.getImage());
+	}
+}

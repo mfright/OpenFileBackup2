@@ -1,0 +1,99 @@
+package jp.ddhost.ofb_ui;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class xmlLoader3{
+
+	/// Load contents.xml
+	public static ArrayList<content> loadXml(){
+
+		// 読み込んだ内容はここへ保管
+		ArrayList<content> contents = new ArrayList<content>();
+
+		try{
+			String path = new File(".").getAbsoluteFile().getParent();
+
+			  // contents.xmlをオープン
+			  File file = new File(path + "\\"+"contents.xml");
+			  BufferedReader br = new BufferedReader(new FileReader(file));
+
+
+
+			  // 全行を読み込み,各contentのfullBufferに保管
+			  content contentBuffer = new content();
+			  String tmpBuffer = br.readLine();
+			  while(tmpBuffer != null){
+
+				  contentBuffer.fullBuffer += tmpBuffer;
+
+				  if(tmpBuffer.indexOf("</content>") > -1){
+					  contentBuffer.finalizeFullBuffer();
+					  contents.add(contentBuffer);
+					  contentBuffer = new content();
+				  }
+
+				  tmpBuffer = br.readLine();
+			  }
+
+			  // contents.xmlをクローズ
+			  br.close();
+
+		}catch(FileNotFoundException e){
+		  System.out.println(e);
+		}catch(IOException e){
+		  System.out.println(e);
+		}
+
+		return contents;
+	}
+
+
+
+
+	public static void displayContents(UserInterface ui,ArrayList<content> contents){
+		try{
+			// 設定１の表示
+			content myContent = contents.get(0);
+
+			ui.txtSourceFolder1.setText(myContent.source);
+			ui.txtDestFolder1.setText(myContent.destination);
+			ui.chkSafeFileEnabled1.setSelected(myContent.deletedsafe);
+			ui.txtDeletedFolder1.setText(myContent.deleted);
+			for(int i=0;i<myContent.excludeFilePaths.size();i++){
+				ui.model1.addElement(myContent.excludeFilePaths.get(i));
+			}
+			ui.chkEncrypt1.setSelected(myContent.encryption);
+			ui.txtPassword1.setText(myContent.encryptPassword);
+			ui.chkDisabled1.setSelected(myContent.disabled);
+
+
+
+			// 設定２の表示
+			myContent = contents.get(0);
+
+			ui.txtSourceFolder2.setText(myContent.source);
+			ui.txtDestFolder2.setText(myContent.destination);
+			ui.chkSafeFileEnabled2.setSelected(myContent.deletedsafe);
+			ui.txtDeletedFolder2.setText(myContent.deleted);
+			for(int i=0;i<myContent.excludeFilePaths.size();i++){
+				ui.model1.addElement(myContent.excludeFilePaths.get(i));
+			}
+			ui.chkEncrypt1.setSelected(myContent.encryption);
+			ui.txtPassword1.setText(myContent.encryptPassword);
+			ui.chkDisabled1.setSelected(myContent.disabled);
+
+
+
+
+
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return;
+	}
+}

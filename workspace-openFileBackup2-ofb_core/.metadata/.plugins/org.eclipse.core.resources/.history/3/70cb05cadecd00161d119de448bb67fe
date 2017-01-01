@@ -1,0 +1,85 @@
+package jp.ddhost.ofb_core;
+
+import java.util.ArrayList;
+
+public class content{
+	public String source = "";	//Backup source folder.
+
+	public String destination = "";	//Backup destination folder.
+
+	public Boolean deletedsafe = false;	// Save deleted files or not.
+	public String deleted = "";	//Folder deleted files.
+
+	public Boolean encryption = false;	//Backup files must be zip-encrypted or not.
+	public String encryptPassword = "";	//zip password.
+
+	public Boolean disabled = false; //This backup-job will not be started if this is true.
+
+
+
+
+	public ArrayList<String> excludeFilePaths = new ArrayList<String>();	//These files will not be copied.
+
+	// Check the file is excluded to backup or not.
+	public Boolean isExcluded(String filePath){
+		if(excludeFilePaths.size() <1){
+			return false;
+		}
+
+		for(int i=0;i<excludeFilePaths.size();i++){
+			if(filePath.equals((String)excludeFilePaths.get(i))){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+
+
+
+
+
+
+
+
+	public String fullBuffer="";	// Full xml code in <content> element.
+
+	public void finalizeFullBuffer(){
+
+		// 各contentのfullBufferから各contentの各プロパティへ情報を反映
+
+
+		if(fullBuffer.indexOf("<source>")>-1){
+			source = fullBuffer.substring(fullBuffer.indexOf("<source>")+8, fullBuffer.indexOf("</source>"));
+		}
+
+		if(fullBuffer.indexOf("<destination>")>-1){
+			destination = fullBuffer.substring(fullBuffer.indexOf("<destination>")+13, fullBuffer.indexOf("</destination>"));
+		}
+
+		if(fullBuffer.indexOf("<deleted>")>-1){
+			deleted = fullBuffer.substring(fullBuffer.indexOf("<deleted>")+9, fullBuffer.indexOf("</deleted>"));
+		}
+
+		if(fullBuffer.indexOf("<deletedsafe>true</deletedsafe>")>-1){
+			deletedsafe = true;
+		}
+
+		if(fullBuffer.indexOf("<encrypt>true</encrypt>")>-1){
+			encryption = true;
+		}
+
+		if(fullBuffer.indexOf("<encryptpassword>")>-1){
+			encryptPassword = fullBuffer.substring(fullBuffer.indexOf("<encryptpassword>")+17, fullBuffer.indexOf("</encryptpassword>"));
+		}
+
+
+
+		if(fullBuffer.indexOf("<exclude>")>-1){
+			excludeFilePaths.add( fullBuffer.substring(fullBuffer.indexOf("<exclude>")+9, fullBuffer.indexOf("</exclude>")) );
+		}
+
+	}
+}

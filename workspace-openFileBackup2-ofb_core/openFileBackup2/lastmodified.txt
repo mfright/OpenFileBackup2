@@ -1,0 +1,7 @@
+C:\Users\_\Documents\SOURCE\aaa1.txt 1483211507229
+C:\Users\_\Documents\SOURCE\exclude\file3.txt 1483211478403
+C:\Users\_\Documents\SOURCE\exclude\file4.txt 1483211483705
+C:\Users\_\Documents\SOURCE\file1.txt 1483211439198
+C:\Users\_\Documents\SOURCE\file2.txt 1483211448548
+C:\Users\_\Documents\SOURCE\folder1\file3.txt 1483211478403
+C:\Users\_\Documents\SOURCE\folder1\file4.txt 1483211483705

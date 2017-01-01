@@ -1,0 +1,77 @@
+package jp.ddhost.ofb_ui;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+class xmlSaver{
+
+	public void saveXml(UserInterface ui){
+		try{
+			  File myFile = new File("contents.xml");
+
+			  if (writableCheck(myFile)){
+				  BufferedWriter writer = new BufferedWriter(new FileWriter(myFile));
+
+				  writer.write("<?xml version=1.0>");
+				  writer.newLine();
+				  writer.write("<contents>");
+				  writer.newLine();
+				  writer.write("   <content>");
+				  writer.newLine();
+				  writer.write("      <title>JOB1</title>");
+				  writer.newLine();
+				  writer.write("      <source>"+ui.txtSourceFolder1.getText()+"</source>");
+				  writer.newLine();
+				  writer.write("      <destination>"+ui.txtDestFolder1.getText()+"</destination>");
+				  writer.newLine();
+
+				  if(ui.chkSafeFileEnabled1.isSelected()){
+					  writer.write("      <deletedsafe>true</deletedsafe>");
+				  }else{
+					  writer.write("      <deletedsafe>false</deletedsafe>");
+				  }
+				  writer.newLine();
+
+				  writer.write("      <deleted>"+ui.txtDeletedFolder1.getText()+"</deleted>");
+				  writer.newLine();
+
+				  if(ui.chkEncrypt1.isSelected()){
+					  writer.write("      <encrypt>true</encrypt>");
+				  }else{
+					  writer.write("      <encrypt>false</encrypt>");
+				  }
+				  writer.newLine();
+
+				  writer.write("      <encryptpassword>"+ui.txtPassword1.getText()+"</encryptpassword>");
+				  writer.newLine();
+
+				  for(int i=0; i<ui.model1.size() ;i++){
+
+				  }
+
+
+				  writer.close();
+			  }else{
+			    System.out.println("ERROR: contents.xml is not writable!");
+			  }
+		    }catch(IOException e){
+		      System.out.println(e);
+		    }
+	}
+
+
+
+
+	//ファイルが過去君可能であるか判定
+	private static boolean writableCheck(File file){
+	    if (file.exists()){
+	      if (file.isFile() && file.canWrite()){
+	        return true;
+	      }
+	    }
+
+	    return false;
+	  }
+}

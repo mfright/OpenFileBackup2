@@ -1,0 +1,27 @@
+package jp.ddhost.ofb_core;
+
+import java.io.File;
+
+class garbageDeleter extends Thread{
+	private File myFile;
+
+	garbageDeleter(File dfile){
+		myFile = dfile;
+
+
+	}
+
+	public void run(){
+		for(int i=0;i<10000;i++){
+
+			myFile.delete();
+
+			if(!dFile.exists()){
+				System.out.println("DELETED  :"+myFile);
+				break;
+			}else{
+				System.out.println("DEL FAIL :"+myFile);
+			}
+		}
+	}
+}

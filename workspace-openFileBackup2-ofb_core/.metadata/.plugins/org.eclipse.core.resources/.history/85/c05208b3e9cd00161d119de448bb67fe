@@ -1,0 +1,305 @@
+package jp.ddhost.ofb_core;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+public class ofb_core2{
+
+	//content myContent;
+	//ArrayList<content> myContents;
+	content aContent;
+
+	public static void main(String[] args){
+		ofb_core2 myOFB = new ofb_core2();
+		myOFB.backup();
+	}
+
+
+	/// メイン処理.
+	private void backup(){
+		// contents.xmlを読み込む。
+		ArrayList<content> myContents = xmlLoader2.loadXml();
+
+
+		for(int i=0;i<myContents.size();i++){
+			printf("------------------------------------------------");
+			printf("Backup"+ (i+1) +" start.");
+
+			aContent = myContents.get(i);
+
+			printf("Copy target     :"+aContent.source);
+			printf("Copy destination:"+aContent.destination);
+			printf("Deleted files in:"+aContent.deleted+"\r\n");
+
+			//バックアップ元ファイルを捜査し、バックアップ先へコピーする。
+			search1(new File(aContent.source));
+
+			//バックアップ先ファイルを捜査し、バックアップ元ファイルから無くなったファイルを削除する。
+			search2(new File(aContent.destination));
+
+			printf("Backup"+ (i+1) +" finished.");
+		}
+	}
+
+
+
+
+	/// 1.バックアップ元フォルダを捜査する。
+	private void search1(File sourceDir){
+
+		// 全ファイル・フォルダ一覧
+		File[] includedFiles = sourceDir.listFiles();
+
+		//ファイル・フォルダが無いときreturn
+		if( includedFiles == null ){
+			return;
+		}
+
+
+		for( File file : includedFiles ) {
+			if( !file.exists() ){
+				continue;
+			}else if( file.isDirectory() ){
+				//フォルダのとき
+
+				//必要ならフォルダ作成
+				makeDestFolder(file);
+
+				//フォルダ内について再帰処理
+		        search1( file );
+
+			}else if( file.isFile() ){
+				//ファイルのとき
+
+				//必要ならコピーする。
+		        compare1( file );
+		    }
+
+		}
+	}
+
+
+
+
+	/// 1.コピー元ファイルとコピー先ファイルを比較し、必要に応じてコピーする。
+	private void compare1(File sourceFile){
+		try {
+			//コピー元ファイル
+			String sourceFilePath = sourceFile.getCanonicalPath();
+
+
+			//コピー先ファイル
+			String destFilePath = aContent.destination+"\\"+sourceFilePath.substring(aContent.source.length());
+			if(aContent.encryption==true){
+				destFilePath += "__.zip";
+			}
+			File destFile = new File(destFilePath);
+
+
+			//削除済みファイルの退避先フォルダ
+			String deletedFilePath="";
+			File deletedFile=null;
+
+			//削除済みファイルは退避が必要な場合、退避先ファイル名を決定しておく
+			if(aContent.deletedsafe == true){
+		        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		        Date date = new Date();
+		        String dateTimeOffset = "_"+sdf.format( date ).toString();
+
+				//deletedFilePath = aContent.deleted+"\\"+sourceFilePath.substring(aContent.source.length());
+
+		        // 退避先フォルダパス + ファイル名
+		        deletedFilePath = aContent.deleted+"\\" + sourceFile.getName();
+
+		        // ファイル名のラストに日時追記
+		        deletedFilePath = deletedFilePath.substring(0,deletedFilePath.length()-4)+dateTimeOffset+deletedFilePath.substring(deletedFilePath.length()-4);
+
+		        // 暗号化の場合、ファイル名の後ろはzip
+				if(aContent.encryption==true){
+					deletedFilePath += "__.zip";
+				}
+				deletedFile = new File(deletedFilePath);
+			}
+
+
+			//バックアップ対象から除外されているとき
+			if(aContent.isExcluded(sourceFilePath)){
+				//バックアップしない
+				printf("Excluded :"+sourceFilePath);
+				return;
+			}
+
+
+			// バックアップ先にすでにファイルがある場合
+			if(destFile.exists()){
+
+				// 双方の最終更新日時を取得
+				Long sourceLastModified = sourceFile.lastModified();
+				Long destLastModified = destFile.lastModified();
+
+				// ファイルの最終更新日時が一緒の場合
+				if(sourceLastModified.equals(destLastModified)){
+					printf("No_change:"+sourceFilePath);
+					//処理を抜ける。
+					return;
+
+				// ファイルの更新日時は違うのでコピーしたいが、バックアップ先にすでにファイルがある場合、すでにあるバックアップを退避先へコピーする。
+				}else if(aContent.deletedsafe == true){
+					printf("COPY     :"+destFilePath + " > "+deletedFilePath);
+					Files.copy(destFile.toPath(), deletedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+				}
+
+			}
+
+
+			//ファイルをコピーする。
+			printf("COPY     :"+sourceFilePath + " > "+destFilePath);
+			if(aContent.encryption== true){
+				//zip暗号化が有効なとき
+				//zip圧縮する。
+				fileArchiever.archieve(sourceFilePath, destFilePath, aContent.encryptPassword);
+
+				//最終更新日時を一致させる。
+				Long lastModified = sourceFile.lastModified();
+				destFile.setLastModified(lastModified);
+
+			}else{
+				//zip暗号化が無効なとき
+				Files.copy(sourceFile.toPath(),destFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+			}
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+	// コピー先にフォルダが無ければ作成
+	private void makeDestFolder(File sourceFolder){
+		try {
+			String sourceFolderPath = sourceFolder.getCanonicalPath();
+			String destFolderPath = aContent.destination+"\\"+sourceFolderPath.substring(aContent.source.length());
+			File destFolder = new File(destFolderPath);
+
+			if(!destFolder.exists()){
+				printf("mkdir    :"+destFolder.getCanonicalPath());
+				destFolder.mkdirs();
+			}
+
+
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+	/// 2.コピー先フォルダを捜査し、コピー元に無いファイルを削除(または退避)する。
+	private void search2(File destDir){
+		File[] includedFiles = destDir.listFiles();
+		if( includedFiles == null ){
+			return;
+		}
+
+		for( File file : includedFiles ) {
+			if( !file.exists() )
+				continue;
+			else if( file.isDirectory() ){
+				search2( file );
+
+			}else if( file.isFile() ){
+		        compare2( file );
+		    }
+
+		}
+	}
+
+
+
+
+
+
+
+	//バックアップ済みファイルをバックアップ元ファイルと比較し、バックアップ元になければ削除(退避)する。
+	private void compare2(File destFile){
+
+		try {
+			//コピー先ファイル
+			String destFilePath = destFile.getCanonicalPath();
+
+
+			//コピー元ファイル
+			String sourceFilePath = aContent.source + "\\"+destFilePath.substring(aContent.destination.length());
+			if(aContent.encryption==true){
+				sourceFilePath = sourceFilePath.substring(0,sourceFilePath.length()-6);
+			}
+			File sourceFile = new File(sourceFilePath);
+
+
+			//削除済みファイルの退避先フォルダ
+			String deletedFilePath="";
+			File deletedFile=null;
+
+			//削除済みファイルは退避が必要な場合、退避先ファイル名を決定しておく
+			if(aContent.deletedsafe == true){
+		        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		        Date date = new Date();
+		        String dateTimeOffset = "_"+sdf.format( date ).toString();
+
+				//deletedFilePath = aContent.deleted+"\\"+sourceFilePath.substring(aContent.source.length());
+
+		        //退避済みファイルのパス
+		        deletedFilePath = aContent.deleted + "\\"+destFile.getName();
+				deletedFilePath = deletedFilePath.substring(0,deletedFilePath.length()-4)+dateTimeOffset+deletedFilePath.substring(deletedFilePath.length()-4);
+
+				// 暗号化有効のときは、拡張子zip
+				if(aContent.encryption==true){
+					deletedFilePath += "__.zip";
+				}
+
+				deletedFile = new File(deletedFilePath);
+			}
+
+
+
+
+			//もしコピー元ファイルが無くなっていた場合
+			if(!sourceFile.exists()){
+				if(aContent.deletedsafe){
+					//削除済みファイルとして退避する。
+					System.out.println("MOVE     :"+destFilePath + " > "+ deletedFilePath);
+					destFile.renameTo(deletedFile);
+
+				}else{
+					//ファイルを消す。
+					destFile.delete();
+				}
+			}
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+	/// 標準出力する
+	private void printf(String message){
+		System.out.println(message);
+	}
+}

@@ -1,0 +1,65 @@
+package jp.ddhost.ofb_ui;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import java.awt.Dialog.ModalityType;
+import javax.swing.JRadioButton;
+
+public class destinationSelector extends JDialog {
+
+	private final JPanel contentPanel = new JPanel();
+
+
+
+	/**
+	 * Create the dialog.
+	 */
+	public destinationSelector() {
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setBounds(100, 100, 661, 300);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+
+		JRadioButton rdbStorage = new JRadioButton("\u30B9\u30C8\u30EC\u30FC\u30B8\u307E\u305F\u306F\u30D5\u30A1\u30A4\u30EB\u30B5\u30FC\u30D0\u3092\u4F7F\u7528");
+		rdbStorage.setSelected(true);
+		rdbStorage.setBounds(8, 40, 404, 21);
+		contentPanel.add(rdbStorage);
+
+
+		JRadioButton rdbFtp = new JRadioButton("FTP\u30B5\u30FC\u30D0\u3092\u4F7F\u7528");
+		rdbFtp.setBounds(8, 113, 404, 21);
+		contentPanel.add(rdbFtp);
+
+
+		JPanel buttonPane = new JPanel();
+		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+		{
+			JButton okButton = new JButton("OK");
+			okButton.setActionCommand("OK");
+			buttonPane.add(okButton);
+			getRootPane().setDefaultButton(okButton);
+		}
+		{
+			JButton cancelButton = new JButton("Cancel");
+			cancelButton.setActionCommand("Cancel");
+			buttonPane.add(cancelButton);
+		}
+
+
+
+		ButtonGroup group = new ButtonGroup();
+		group.add(rdbStorage);
+		group.add(rdbFtp);
+
+	}
+
+}

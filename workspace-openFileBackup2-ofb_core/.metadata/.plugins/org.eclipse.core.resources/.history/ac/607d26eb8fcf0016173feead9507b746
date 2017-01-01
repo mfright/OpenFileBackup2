@@ -1,0 +1,17 @@
+package jp.ddhost.ofb_core;
+
+import java.io.File;
+
+/// ファイルの最終更新日を管理するクラス
+class lastModifiedManager{
+
+
+	public void saveLastModified(File sourceFile){
+
+	}
+
+	/*
+	public long getLastModified(File sourceFile){
+
+	}*/
+}

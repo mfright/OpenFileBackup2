@@ -1,0 +1,322 @@
+package jp.ddhost.ofb_core;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.SocketException;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+
+//FTPサーバへバックアップするクラス
+class searchSourceFileFTP{
+
+
+	content aContent;	//このインスタンスが処理するcontent
+
+	// FTPクライアント
+	FileOutputStream fos = null;
+	FTPClient client = new FTPClient();
+
+	lastModifiedManager lmm;
+
+
+
+	//コンストラクタ
+	searchSourceFileFTP(content myContent){
+		aContent = myContent;
+
+		// 最終更新日時情報を読み込む。
+		lmm = new lastModifiedManager();
+
+		// バックアップ処理する
+		searchSourceFilesFTP(new File(aContent.source));
+
+		//最終更新日情報ファイルを保存する。
+		lmm.close();
+	}
+
+
+
+
+	/// 1.バックアップ元フォルダを捜査する。
+	/// このメソッドは再帰的に呼ばれる注意！
+	private void searchSourceFilesFTP(File sourceDir){
+
+		try {
+			// FTP接続する。
+			if( ftpConnect() == false){
+				return;
+			}
+
+
+			// コピー元の全ファイル・フォルダ一覧
+			File[] includedFiles = sourceDir.listFiles();
+			if( includedFiles == null ){
+				return;
+			}
+
+
+			for( File file : includedFiles ) {
+				if( !file.exists() ){
+					continue;
+
+				}else if( file.isDirectory() ){
+					//フォルダのとき
+
+					//必要ならフォルダ作成
+					makeDestFolder(file);
+
+					//フォルダ内について再帰処理
+			        searchSourceFilesFTP( file );
+
+				}else if( file.isFile() ){
+					//ファイルのとき
+
+					//必要ならコピーする。
+					compare( file );
+			    }
+
+			}
+
+
+
+
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+
+
+
+
+		// FTP切断
+		ftpDisconnect();
+
+
+
+
+	}
+
+
+
+
+	// FTP接続する
+	private Boolean ftpConnect(){
+
+		try{
+		client.connect(aContent.getFTPURL());
+		if (!FTPReply.isPositiveCompletion(client.getReplyCode())){
+			System.out.println("ERROR    : FTP connection failed.");
+			return false;
+		}
+
+		// FTPログイン
+		if (client.login(aContent.ftpid, aContent.ftppw) == false) { // ログインできたか？
+			System.out.println("ERROR    : FTP login failed.");
+			return false;
+		}
+
+		// バイナリモードに設定
+		client.setFileType(FTP.BINARY_FILE_TYPE);
+
+		// Passiveモードに設定
+		//client.enterLocalPassiveMode();
+		}catch(SocketException e){
+
+		}catch(IOException e){
+
+		}
+
+		return true;
+	}
+
+
+
+
+	/// FTP切断する
+	private void ftpDisconnect(){
+
+
+		try {
+			client.disconnect();
+			//fis.close();
+			fos.close();
+
+		} catch (Exception e) {
+			// Nothing to do.
+		}
+	}
+
+
+
+
+	//バックアップ元とバックアップ先を見比べ、必要に応じてアップロードする
+	private void compare(File sourceFile){
+
+		try{
+			// 最終更新日が前回バックアップ時と同じなら、スキップする。
+			Long sourceFileModified = sourceFile.lastModified();
+			Long destFileModified = lmm.getLastModified(sourceFile);
+
+
+			if(sourceFileModified.equals(destFileModified)){
+				System.out.println("No-change:"+sourceFile.getCanonicalPath());
+				return;
+			}
+
+			// 最終更新日が前回バックアップ時と異なるなら、最終更新日を登録する
+			lmm.saveLastModified(sourceFile);
+
+
+
+			// コピー元ファイルパスがバックアップ対象外のときはバックアップしない。
+			String sourceFilePath = sourceFile.getCanonicalPath();
+			if(aContent.isExcluded(sourceFilePath)){
+				System.out.println("Excluded :"+sourceFilePath);
+				return;
+			}
+
+
+			// 暗号化が有効な時は、一時zipファイルを作成する。
+			String zipFilePath="";
+			if(aContent.encryption== true){
+				zipFilePath = sourceFilePath + "___.zip";
+				fileArchiever.archieve(sourceFilePath, zipFilePath, aContent.encryptPassword);
+				sourceFilePath = zipFilePath;
+			}
+
+
+			//コピー先ファイルパス
+			int sourceLength = aContent.source.length();
+			String destFilePath = sourceFilePath.substring(sourceLength);
+			destFilePath = destFilePath.replace('\\','/');
+			destFilePath = aContent.getFtpRemoteDir() + destFilePath;
+
+			System.out.println("Upload   :"+sourceFilePath + " > "+destFilePath);
+
+
+
+
+
+
+			//アップロードは3回まで試行
+			for(int i=0;i<3;i++){
+
+				try {
+
+					FileInputStream fis = new FileInputStream(sourceFilePath);
+					if(fis.equals(null)){
+						System.out.println("ERROR    :fis is null");
+					}
+
+					// アップロード
+					client.storeFile(destFilePath, fis);
+
+					fis.close();
+
+					//アップロードに成功したらループから抜ける
+					break;
+
+
+				} catch (NullPointerException e){
+					// アップロードに失敗したとき
+
+					// FTPの再接続を試行する。
+					ftpDisconnect();
+					ftpConnect();
+
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+
+
+
+			//暗号化が有効な時は、一時zipファイルを削除する。
+			if(aContent.encryption){
+				File zipFile = new File(zipFilePath);
+				zipFile.delete();
+
+				if(zipFile.exists()){
+
+					Runtime r = Runtime.getRuntime();
+
+					r.exec("java garbageDeleter "+ zipFilePath);
+
+
+
+
+
+				}
+
+			}
+
+
+
+
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+	//アップロード先にフォルダ作成する。
+	private void makeDestFolder(File sourceDir){
+
+		// バックアップ対象から除外されているときはフォルダ作成しない
+		try {
+			String sourceDirPath = sourceDir.getCanonicalPath();
+
+			//バックアップ対象から除外されているとき
+			if(aContent.isExcluded(sourceDirPath)){
+				System.out.println("Excluded :"+sourceDirPath);
+				return;
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+
+
+
+		// 処理は３回試す。
+		for(int i=0;i<3;i++){
+
+			try {
+				// コピー元フォルダ
+				String sourceDirPath = sourceDir.getCanonicalPath();
+
+				//コピー先ディレクトリ
+				int sourceLength = aContent.source.length();
+				String destDirPath = sourceDirPath.substring(sourceLength);
+				destDirPath = destDirPath.replace('\\','/');
+				destDirPath = aContent.getFtpRemoteDir() + destDirPath;
+
+				System.out.println("mkdir    :"+destDirPath);
+				client.makeDirectory(destDirPath);
+
+				//成功したらループを抜ける。
+				break;
+
+
+			} catch (IOException e) {
+				// フォルダ作成に失敗したとき
+
+				// FTPの再接続を試行する。
+				ftpDisconnect();
+				ftpConnect();
+				//e.printStackTrace();
+			}
+		}
+
+
+
+
+	}
+}

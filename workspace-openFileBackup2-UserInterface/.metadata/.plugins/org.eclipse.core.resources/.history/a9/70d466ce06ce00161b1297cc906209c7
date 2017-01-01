@@ -1,0 +1,44 @@
+package jp.ddhost.ofb_ui;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+class xmlSaver{
+
+	public void saveXml(){
+		try{
+			  File myFile = new File("contents.xml");
+
+			  if (writableCheck(myFile)){
+				  BufferedWriter writer = new BufferedWriter(new FileWriter(myFile));
+
+				  writer.write("こんにちは");
+				  writer.newLine();
+				  writer.write("お元気ですか？");
+				  writer.newLine();
+
+				  writer.close();
+			  }else{
+			    System.out.println("ファイルに書き込めません");
+			  }
+		    }catch(IOException e){
+		      System.out.println(e);
+		    }
+	}
+
+
+
+
+	//ファイルが過去君可能であるか判定
+	private static boolean writableCheck(File file){
+	    if (file.exists()){
+	      if (file.isFile() && file.canWrite()){
+	        return true;
+	      }
+	    }
+
+	    return false;
+	  }
+}
