@@ -119,14 +119,18 @@ class searchSourceFile{
 				Long destLastModified = destFile.lastModified();
 
 
+
+
 				// ファイルの最終更新日時が一緒の場合
-				if(sourceLastModified.equals(destLastModified)){
-					printf("No_change:"+sourceFilePath);
+				//if(sourceLastModified.equals(destLastModified)){
+				if(destLastModified - 120000 < sourceLastModified && sourceLastModified < destLastModified + 120000){
+					printf("NO_CHANGE:"+sourceFilePath);
 					//処理を抜ける。
 					return;
 
-				// ファイルの更新日時は違うのでコピーしたいが、バックアップ先にすでにファイルがある場合、すでにあるバックアップを退避先へコピーする。
 				}else if(aContent.deletedsafe == true){
+					// ファイルの更新日時は違うのでコピーしたいが、バックアップ先にすでにファイルがある場合、すでにあるバックアップを退避先へコピーする。
+
 					printf("ESCAPE   :"+destFilePath + " > "+deletedFilePath);
 					Files.copy(destFile.toPath(), deletedFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
 				}

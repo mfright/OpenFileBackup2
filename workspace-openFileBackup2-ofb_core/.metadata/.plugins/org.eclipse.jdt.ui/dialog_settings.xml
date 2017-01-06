@@ -22,12 +22,13 @@
 		<item value="400" key="height"/>
 	</section>
 	<section name="FatJarPackageWizard">
-		<item value="C:\Users\_\Documents\pleiades\workspace-openFileBackup2-ofb_core" key="FatJarPackageWizardPage.ANTSCRIPT_LOCATION"/>
+		<item value="C:\Users\_\Documents\pleiades\workspace-openFileBackup2-ofb_core.xml" key="FatJarPackageWizardPage.ANTSCRIPT_LOCATION"/>
 		<item value="ofb_core2 - openFileBackup2" key="FatJarPackageWizardPage.LAUNCH_CONFIGURATION_SELECTION_NAME"/>
-		<item value="C:\Users\_\Documents\pleiades\OpenFileBackup_r1\ofb_core.jar" key="FatJarPackageWizardPage.DESTINATION_PATH_SELECTION"/>
+		<item value="C:\Users\_\Documents\GitHub\OpenFileBackup2\OpenFileBackup_v101\ofb_core.jar" key="FatJarPackageWizardPage.DESTINATION_PATH_SELECTION"/>
 		<item value="false" key="FatJarPackageWizardPage.ANTSCRIPT_SAVE"/>
 		<item value="1" key="FatJarPackageWizardPage.LIBRARY_HANDLING"/>
 		<list key="FatJarPackageWizardPage.DESTINATION_NAMES_ID">
+			<item value="C:\Users\_\Documents\GitHub\OpenFileBackup2\OpenFileBackup_v101\ofb_core.jar"/>
 			<item value="C:\Users\_\Documents\pleiades\OpenFileBackup_r1\ofb_core.jar"/>
 			<item value="C:\Users\_\Documents\pleiades\ofb-release\ofb_core.jar"/>
 			<item value="C:\Users\_\Documents\pleiades\workspace-openFileBackup2-UserInterface\openFileBackup2-UI\ofb_core.jar"/>
